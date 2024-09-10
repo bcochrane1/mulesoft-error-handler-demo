@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<configuration doc:name="Configuration" doc:id="bac7396f-a121-4e71-beca-825b50910989" defaultErrorHandler-ref="error-commonError_Handler" />
+	<flow name="global-error-handlerFlow" doc:id="5688589d-59b4-4ef5-81b7-fff024e7c34f" >
+		<http:listener doc:name="/global/2" doc:id="c3a578c5-db8a-489f-9047-f5a5c031645a" config-ref="HTTP_Listener_config" path="/global/2">
+			<http:error-response >
+				<http:body ><![CDATA[#[output application/json --- error]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<ee:transform doc:name="Transform Message" doc:id="750cef8d-4f31-4a26-8789-28d9a31efa43" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message": "initial payload"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="global-error-handlerFlow1" doc:id="8a422738-1354-4c86-8770-28bd2fc2dd5d" name="global-error-handlerFlow1"/>
+		<logger level="INFO" doc:name="Logger" doc:id="75457dcb-9860-464a-a596-2a873eb77930" />
+	</flow>
+	<flow name="global-error-handlerFlow1" doc:id="b0c327e2-88ac-411a-8a9b-06ca25ce5b00" >
+		<validation:is-true doc:name="Is true" doc:id="4fde7257-f8cf-4581-a9e8-eeee4e77a440" />
+		<logger level="INFO" doc:name="Logger" doc:id="1e5bfcff-1cac-4e28-83f6-f78cc6862119" />
+	</flow>
+</mule>
