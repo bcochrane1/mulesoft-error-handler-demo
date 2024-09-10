@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  MuleSoft Training - Anypoint Platform Development: Level 2
+  %%
+  Copyright (C) 2019 - 2021 MuleSoft, Inc. All rights reserved. http://www.mulesoft.com
+  %%
+  The software in this package is published under the terms of the
+  Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International Public License,
+  a copy of which has been included with this distribution in the LICENSE.txt file.
+  #L%
+  -->
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="  http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+  <!--
+  The including Mule app MUST:
+  - include <import file="error-common.xml" doc:name="Import error-common.xml" />
+  -->
+  <error-handler name="error-commonError_Handler" doc:id="19fa8aa9-4923-43d8-9250-5da769507a1f" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="35888352-a421-4ca8-b22a-d750a02c562d" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="9aab5056-90ab-4fee-8bbc-0c15166d161e" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"description":"global error handler, on error propagate",
+	"payload": payload,
+	"error": error default null
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="86487575-9f59-461f-90d7-6cf2ba30dedf" message="#[payload]"/>
+		</on-error-propagate>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a0e454e5-e0e1-4c25-8b74-551b1fe35683" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="27cbbc4a-55fa-4bc0-9e2e-fbc463c50b5a" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"description":"global error handler, on error propagate",
+	"payload": payload,
+	"error": error default null
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="fd694451-87c1-432e-81b8-92072dc19465" message="#[payload]" />
+		</on-error-continue>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="145cecbf-733f-420d-881f-ba1406047be1" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="c21e89ec-c127-4696-a6ac-89726a53918b" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"description":"global error handler, on error propagate",
+	"payload": payload,
+	"error": error default null
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="8b222102-98cb-4e21-bb30-2f59321f8e25" message="#[payload]" />
+		</on-error-propagate>
+	</error-handler>
+</mule>

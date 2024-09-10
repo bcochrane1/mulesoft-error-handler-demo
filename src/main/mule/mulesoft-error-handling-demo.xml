@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:cluster="http://www.mulesoft.org/schema/mule/ee/cluster"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="be085837-031d-49a7-adab-d255ccea1a28" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="939995fa-f878-4a5d-b58a-b83cdef4eb79" />
+	<configuration doc:name="Configuration" doc:id="9391b3ad-e1eb-4e23-9456-ba7881b06cee" defaultErrorHandler-ref="error-commonError_Handler" >
+		<cluster:cluster-config >
+			<cluster:performance-store-profile />
+		</cluster:cluster-config>
+	</configuration>
+	<flow name="global-error-handler-flow1" doc:id="9c3548eb-3412-4c60-8d5c-8b9c065873b0" >
+		<http:listener doc:name="/global/1" doc:id="03581fa1-9d5f-41d4-974c-5bc40c83ffe4" config-ref="HTTP_Listener_config" path="/global/1"/>
+		<ee:transform doc:name="on error continue parent flow" doc:id="d7ee6cca-6c60-4d6b-a913-11172e778d1d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "global error handler flow"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<validation:is-false doc:name="Is false" doc:id="1c766505-ac88-4ca1-b317-c77e55694f52" config-ref="Validation_Config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3e414878-fa7f-4915-ba1d-82c2d2ec719d" />
+		<error-handler ref="error-commonError_Handler" />
+	</flow>
+	<flow name="propogate-1-mulesoft-error-handling-demoFlow" doc:id="fd2b894a-6585-4c96-bafa-b67c46787c35" >
+		<http:listener doc:name="/propagate/1" doc:id="2faaaef5-e76b-4783-8eab-9a0bfc0aa695" config-ref="HTTP_Listener_config" path="/propagate/1"/>
+		<ee:transform doc:name="on error continue parent flow" doc:id="fc8d68ab-d7cf-489d-a559-3386787225f7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "on error continue parent flow"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="on-error-propagate-child-flow" doc:id="58c952f9-f5aa-49db-a8b8-7ab8000543f0" name="on-error-propagate-child-flow"/>
+		<ee:transform doc:name="on error propagate should never reach this" doc:id="9ad73740-3576-4b47-8435-283a8d266771" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "on error propagate should never reach this"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5639d668-7758-4c89-ae75-057051c680cb" >
+				<logger level="INFO" doc:name="Logger" doc:id="3150453f-dbfb-435c-8f69-cc3ea379286f" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="on-error-propagate-child-flow" doc:id="3d739295-c1b1-4256-82a6-9126e9f82a36">
+		<ee:transform doc:name="child flow for on propagate" doc:id="13581daf-5f75-490b-b2c0-4346a1333b7b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "child flow for on propagate"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<validation:is-true doc:name="Is true" doc:id="14c55f41-a944-4dbe-9584-431ae84a3682" config-ref="Validation_Config" message='"custom error message"' />
+		<logger level="INFO" doc:name="Logger" doc:id="b2db581a-8199-4117-a878-07799e10da3b" />
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9600452d-9ac0-4c17-9929-ffb74be75a6d" type="ANY">
+				<ee:transform doc:name="on error propagate" doc:id="ebeb55c0-f87f-4ccd-b1bc-be4b277e4306">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "on error propagate"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="propogate-1-mulesoft-error-handling-demoFlow1" doc:id="4d46b42f-8e86-45cf-b8db-ae13e8d556ed">
+		<http:listener doc:name="/continue/1" doc:id="811bd92a-03c4-4706-9d69-067bd7d6675a" config-ref="HTTP_Listener_config" path="/continue/1" />
+		<logger level="INFO" doc:name="Logger" doc:id="5fdb0632-d9e7-40dc-9c18-5e77fe934942" />
+		<flow-ref doc:name="on-error-continue-child-flow" doc:id="488dccdc-3607-41a8-a8da-fb8a05c205d7" name="on-error-continue-child-flow" />
+		<logger level="INFO" doc:name="logs payload from child flow" doc:id="f9aa058a-cb18-411e-b712-64fb8f92b4d3" message="payload"/>
+		<ee:transform doc:name="on error continue will reach this" doc:id="0553d4b0-ee63-4357-8ef0-163251bf86ec" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "on error continue will reach this"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="logs payload after transformer to show updated value" doc:id="6b4f66ec-d97f-4e93-86b2-be30ae7f0650" message="payload" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="91a0de3b-8eb7-47e5-b1d3-459193532578" >
+				<logger level="INFO" doc:name="Logger" doc:id="18eaf0d9-7b2d-4303-a5d8-8d32f9cbfc4f" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="on-error-continue-child-flow" doc:id="86e038c4-bd18-4bbb-8645-037c9913f33d" >
+		<ee:transform doc:name="child flow for on propagate" doc:id="3ea93de5-e423-4f2a-a345-a4cae86f552e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "child flow for on continue"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<validation:is-true doc:name="Is true" doc:id="5896bce9-b654-4f9e-815c-962f7542c812" config-ref="Validation_Config" message='"custom error message"'/>
+		<logger level="INFO" doc:name="Logger" doc:id="1d2fb534-ab33-4b90-ac62-d7c485257650" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="329152ed-7da0-4adb-a346-0cc2e776dd90" >
+				<ee:transform doc:name="on error propagate" doc:id="ad65d540-4750-47c5-b2c0-ba4dc0008584" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "on error continue"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="global-error-handler-flow2" doc:id="5e2dbf9c-42a1-4e25-a984-a83931713b76" >
+		<http:listener doc:name="/try/1" doc:id="378e2652-420f-4fc1-ad2e-f9d1415dbdce" config-ref="HTTP_Listener_config" path="/try/1" />
+		<ee:transform doc:name="on error continue parent flow" doc:id="e47cac89-c769-4eb9-b26b-90eed22d4d5d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "global error handler flow"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<try doc:name="Try" doc:id="93ec998e-7a94-432b-9ec1-45c788c5ff6f" >
+			<validation:is-true doc:name="Is true" doc:id="1a1f1582-eed5-4e1a-96b8-e843e03ca7c2" config-ref="Validation_Config" message='"custom error message"' />
+			<logger level="INFO" doc:name="Logger" doc:id="b47244b6-8da1-499f-8817-29680d9796a2" />
+		</try>
+		<logger level="INFO" doc:name="Logger" doc:id="089ba572-fe38-49cd-84c1-f633dbb5c20b" />
+	</flow>
+	<flow name="global-error-handler-flow" doc:id="f8be639d-08d6-4f17-bdbe-ca114832ce4b" >
+		<http:listener doc:name="/try/2" doc:id="d908f127-cf07-4a28-b127-7691dd18f163" config-ref="HTTP_Listener_config" path="/try/2" />
+		<ee:transform doc:name="on error continue parent flow" doc:id="ee5d9f45-c2b7-4b9b-a1e3-478496dbd2fb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "global error handler flow"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<try doc:name="Try" doc:id="70b8babd-fead-49e4-b438-23382e440670" >
+			<validation:is-true doc:name="Is true" doc:id="f7f1fa80-ec8e-4e3d-8202-213e4f6f70c0" config-ref="Validation_Config" message='"custom error message"' />
+			<logger level="INFO" doc:name="Logger" doc:id="d69c4aad-7463-4f5c-82b7-7d1ab3e8d8dd" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="182f0074-670e-48fb-889b-c503e6f47877" >
+					<logger level="INFO" doc:name="Logger" doc:id="71249f51-0d0b-412a-be36-55ac06f63a60" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="Logger" doc:id="58a3e695-f583-4b07-90fc-a2a97fe662a1" />
+	</flow>
+</mule>
