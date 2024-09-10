@@ -1,0 +1,170 @@
+{
+	"info": {
+		"_postman_id": "19cb82a6-9086-48b3-ac9e-45323aea2727",
+		"name": "error-handling-demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24234432"
+	},
+	"item": [
+		{
+			"name": "propagate/1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/propagate/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"propagate",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "propagate/2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/propagate/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"propagate",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "propagate/error",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/propagate/error",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"propagate",
+						"error"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "global/1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/global/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"global",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "continue/1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/continue/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"continue",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "continue/error",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/continue/error",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"continue",
+						"error"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "try/propagate",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/try/propagate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"try",
+						"propagate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "try/continue",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/try/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"try",
+						"2"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

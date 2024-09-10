@@ -10,11 +10,7 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="939995fa-f878-4a5d-b58a-b83cdef4eb79" />
-	<configuration doc:name="Configuration" doc:id="9391b3ad-e1eb-4e23-9456-ba7881b06cee" defaultErrorHandler-ref="error-commonError_Handler" >
-		<cluster:cluster-config >
-			<cluster:performance-store-profile />
-		</cluster:cluster-config>
-	</configuration>
+
 	<flow name="global-error-handler-flow1" doc:id="9c3548eb-3412-4c60-8d5c-8b9c065873b0" >
 		<http:listener doc:name="/global/1" doc:id="03581fa1-9d5f-41d4-974c-5bc40c83ffe4" config-ref="HTTP_Listener_config" path="/global/1"/>
 		<ee:transform doc:name="on error continue parent flow" doc:id="d7ee6cca-6c60-4d6b-a913-11172e778d1d" >
@@ -30,6 +26,35 @@ output application/json
 		<validation:is-false doc:name="Is false" doc:id="1c766505-ac88-4ca1-b317-c77e55694f52" config-ref="Validation_Config"/>
 		<logger level="INFO" doc:name="Logger" doc:id="3e414878-fa7f-4915-ba1d-82c2d2ec719d" />
 		<error-handler ref="error-commonError_Handler" />
+	</flow>
+	<flow name="mulesoft-error-handling-demoFlow" doc:id="211d6336-d352-4495-8a7a-79187de3ef1d">
+		<http:listener doc:name="/propagate/2" doc:id="0df17886-5fed-479f-a422-81835bd1a965" config-ref="HTTP_Listener_config" path="/propagate/2" />
+		<ee:transform doc:name="on error continue parent flow" doc:id="51ffcac6-9904-48b4-bc71-566cf20e399f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "on error continue parent flow"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="on-error-propagate-child-flow" doc:id="6f928a87-49ce-4c49-b7c4-954de9d235a1" name="on-error-propagate-child-flow" />
+		<ee:transform doc:name="on error continue flow error handler will keep processing records" doc:id="c03b9f39-d180-45a2-bdd7-1b1afd9f1f59">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "on error continue flow error handler will keep processing records"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5639d668-7758-4c89-ae75-057051c680cb">
+				<logger level="INFO" doc:name="Logger" doc:id="3150453f-dbfb-435c-8f69-cc3ea379286f" />
+			</on-error-continue>
+		</error-handler>
 	</flow>
 	<flow name="propogate-1-mulesoft-error-handling-demoFlow" doc:id="fd2b894a-6585-4c96-bafa-b67c46787c35" >
 		<http:listener doc:name="/propagate/1" doc:id="2faaaef5-e76b-4783-8eab-9a0bfc0aa695" config-ref="HTTP_Listener_config" path="/propagate/1"/>
@@ -54,11 +79,6 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<error-handler >
-			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5639d668-7758-4c89-ae75-057051c680cb" >
-				<logger level="INFO" doc:name="Logger" doc:id="3150453f-dbfb-435c-8f69-cc3ea379286f" />
-			</on-error-continue>
-		</error-handler>
 	</flow>
 	<flow name="on-error-propagate-child-flow" doc:id="3d739295-c1b1-4256-82a6-9126e9f82a36">
 		<ee:transform doc:name="child flow for on propagate" doc:id="13581daf-5f75-490b-b2c0-4346a1333b7b">
@@ -82,6 +102,36 @@ output application/json
 ---
 {
 	"message": "on error propagate"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="mulesoft-error-handling-demoFlow1" doc:id="2e1f92f9-f5ff-44dc-8564-6e8a3ec02884" >
+		<http:listener doc:name="/propagate/error" doc:id="edc16bce-be74-474e-97d6-79474427b83a" config-ref="HTTP_Listener_config" path="/propagate/error"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3b3c29fc-6c80-4c2c-9717-3b95cd7cfc08" />
+		<ee:transform doc:name="Transform Message" doc:id="e64ae3f6-eab2-4bfe-80a0-9501af508b7a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "default payload"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<raise-error doc:name="Raise error" doc:id="293c2ff6-2538-4b45-9c0b-0c25430e5d7d" type="ANY"/>
+		<logger level="INFO" doc:name="Logger" doc:id="bcda8d6d-f794-4cdc-88f8-459fb34f3035" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="01ea4731-83bf-4e5f-9be2-78cea163a3c4" >
+				<ee:transform doc:name="Transform Message" doc:id="f6f60b2f-6bec-4e3f-80d7-867642cd107d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "raised error, on propagate"
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
@@ -139,7 +189,7 @@ output application/json
 		</error-handler>
 	</flow>
 	<flow name="global-error-handler-flow2" doc:id="5e2dbf9c-42a1-4e25-a984-a83931713b76" >
-		<http:listener doc:name="/try/1" doc:id="378e2652-420f-4fc1-ad2e-f9d1415dbdce" config-ref="HTTP_Listener_config" path="/try/1" />
+		<http:listener doc:name="/try/propagate" doc:id="378e2652-420f-4fc1-ad2e-f9d1415dbdce" config-ref="HTTP_Listener_config" path="/try/propagate" />
 		<ee:transform doc:name="on error continue parent flow" doc:id="e47cac89-c769-4eb9-b26b-90eed22d4d5d" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -157,7 +207,7 @@ output application/json
 		<logger level="INFO" doc:name="Logger" doc:id="089ba572-fe38-49cd-84c1-f633dbb5c20b" />
 	</flow>
 	<flow name="global-error-handler-flow" doc:id="f8be639d-08d6-4f17-bdbe-ca114832ce4b" >
-		<http:listener doc:name="/try/2" doc:id="d908f127-cf07-4a28-b127-7691dd18f163" config-ref="HTTP_Listener_config" path="/try/2" />
+		<http:listener doc:name="/try/continue" doc:id="d908f127-cf07-4a28-b127-7691dd18f163" config-ref="HTTP_Listener_config" path="/try/continue" />
 		<ee:transform doc:name="on error continue parent flow" doc:id="ee5d9f45-c2b7-4b9b-a1e3-478496dbd2fb" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -178,5 +228,62 @@ output application/json
 			</error-handler>
 		</try>
 		<logger level="INFO" doc:name="Logger" doc:id="58a3e695-f583-4b07-90fc-a2a97fe662a1" />
+	</flow>
+	<flow name="mulesoft-error-handling-demoFlow2" doc:id="6a507a61-458c-4410-8dca-e4f37c21bef5" >
+		<http:listener doc:name="/continue/error" doc:id="7c18b272-bb50-4263-a693-dc7b39827e56" config-ref="HTTP_Listener_config" path="/continue/error" />
+		<logger level="INFO" doc:name="Logger" doc:id="84d6fbcf-d9e6-4477-a0ea-e58b8e39fdfa" />
+		<ee:transform doc:name="Transform Message" doc:id="019547fd-e4d6-4070-9243-88208a004bc7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "default payload"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<raise-error doc:name="Raise error" doc:id="28cba84f-89b6-4ee9-a18a-7cd4e7459c07" type="ERROR:INVALID_REQUEST" />
+		<logger level="INFO" doc:name="Logger1" doc:id="1ab79162-5cbe-4229-b2dc-3b557b7b9dd2" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f4a8e9b5-711c-4ecd-918c-97c34654abac" type="STREAM_MAXIMUM_SIZE_EXCEEDED">
+				<logger level="INFO" doc:name="Logger" doc:id="8e97cd38-4489-46ac-947b-43b65bbb0f3e" />
+			</on-error-propagate>
+			<!-- [STUDIO:"On Error Continue"]<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4785ffd3-329d-47da-9c9a-8a633b2df976" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="887a0bd9-81db-49de-9645-dd69a0515fd5">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+	"message": "raised error, on continue"
+}&#93;&#93;></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue> [STUDIO] -->
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9b1bdb25-634b-41a4-82d0-0d89279784ff" type="ERROR:INVALID_REQUEST">
+				<ee:transform doc:name="Transform Message" doc:id="5afaca0f-a7ac-41f9-9248-2c24161eb886" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "ERROR:INVALID_REQUEST"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6d81da4a-ec72-45ed-a1dc-48f57592ebe0" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="b25ac664-7847-40c6-bf30-db58a18a44ac" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "raised error, on continue"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
 	</flow>
 </mule>
